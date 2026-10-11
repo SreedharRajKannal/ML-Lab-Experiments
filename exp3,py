@@ -1,0 +1,48 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV
+
+diabetes = load_diabetes()
+df = pd.DataFrame(diabetes.data, columns = diabetes.feature_names)
+
+
+X = diabetes.data
+y = diabetes.target
+
+x_train,x_test,y_train,y_test = train_test_split(X,y,test_size = 0.2, random_state =42)
+
+scaler = StandardScaler()
+x_train_scaled = scaler.fit_transform(x_train)
+x_test_scaled = scaler.transform(x_test)
+model = LinearRegression()
+model.fit(x_train_scaled,y_train)
+
+y_pred = model.predict(x_test_scaled)
+
+mse = mean_squared_error(y_test,y_pred)
+r2 = r2_score(y_test,y_pred)
+print("Linear Regression")
+print(f"MSE:{mse:.2f}\nR2:{r2:.2f}")
+
+alphas_test = [0.01,0.1,1,10,100]
+
+ridge = RidgeCV(alphas=alphas_test, cv=5)
+ridge.fit(x_train_scaled,y_train)
+lasso = LassoCV(alphas=alphas_test, cv=5)
+lasso.fit(x_train_scaled,y_train)
+
+r = ridge.predict(x_test_scaled)
+mse = mean_squared_error(y_test,r)
+r2 = r2_score(y_test,r)
+print("Ridge Regression")
+print(f"MSE:{mse:.2f}\nR2:{r2:.2f}")
+l = lasso.predict(x_test_scaled)
+mse = mean_squared_error(y_test,l)
+r2 = r2_score(y_test,l)
+print("Lasso Regression")
+print(f"MSE:{mse:.2f}\nR2:{r2:.2f}")
